@@ -1,25 +1,26 @@
-import { useMemo, useState } from 'react';
-import { STATUS, EMPTY_ORDER_DRAFT } from './constants';
-import { parseOrderText } from './lib/parseOrder';
-import { exportOrdersToXlsx, buildExportFilename } from './lib/exportXlsx';
-import { useOrders } from './hooks/useOrders';
-import { useToast } from './hooks/useToast';
-import Header from './components/layout/Header';
-import Stats from './components/layout/Stats';
-import Toast from './components/ui/Toast';
-import PasteOrderBox from './components/order/PasteOrderBox';
-import OrderForm from './components/order/OrderForm';
-import OrderToolbar from './components/order/OrderToolbar';
-import OrderList from './components/order/OrderList';
+import { useMemo, useState } from "react";
+import { STATUS, EMPTY_ORDER_DRAFT } from "./constants";
+import { parseOrderText } from "./lib/parseOrder";
+import { exportOrdersToXlsx, buildExportFilename } from "./lib/exportXlsx";
+import { useOrders } from "./hooks/useOrders";
+import { useToast } from "./hooks/useToast";
+import Header from "./components/layout/Header";
+import Stats from "./components/layout/Stats";
+import Toast from "./components/ui/Toast";
+import PasteOrderBox from "./components/order/PasteOrderBox";
+import OrderForm from "./components/order/OrderForm";
+import OrderToolbar from "./components/order/OrderToolbar";
+import OrderList from "./components/order/OrderList";
 
 export default function App() {
-  const { orders, addOrder, deleteOrder, toggleStatus, markFinished } = useOrders();
+  const { orders, addOrder, deleteOrder, toggleStatus, markFinished } =
+    useOrders();
   const { toast, showToast, dismissToast } = useToast();
 
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState("light");
   const [draft, setDraft] = useState(EMPTY_ORDER_DRAFT);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   /* ---------------------------- derived values ---------------------------- */
   const notDoneOrders = useMemo(
@@ -29,7 +30,8 @@ export default function App() {
   const finishedCount = orders.length - notDoneOrders.length;
 
   const totalValue = useMemo(
-    () => notDoneOrders.reduce((sum, order) => sum + Number(order.amount || 0), 0),
+    () =>
+      notDoneOrders.reduce((sum, order) => sum + Number(order.amount || 0), 0),
     [notDoneOrders],
   );
 
@@ -39,11 +41,11 @@ export default function App() {
       const matchesSearch =
         !term ||
         [order.name, order.phone, order.address, order.note]
-          .join(' ')
+          .join(" ")
           .toLowerCase()
           .includes(term);
       const matchesStatus =
-        statusFilter === 'All' || order.status === statusFilter;
+        statusFilter === "All" || order.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [orders, searchTerm, statusFilter]);
@@ -53,13 +55,19 @@ export default function App() {
     const parsed = parseOrderText(text);
     setDraft(parsed);
 
-    const found = [parsed.name, parsed.phone, parsed.address, parsed.amount].filter(
-      Boolean,
-    ).length;
+    const found = [
+      parsed.name,
+      parsed.phone,
+      parsed.address,
+      parsed.amount,
+    ].filter(Boolean).length;
     if (found === 0) {
-      showToast('Could not read any fields. Please fill the form manually.', 'error');
+      showToast(
+        "Could not read any fields. Please fill the form manually.",
+        "error",
+      );
     } else {
-      showToast('Parsed. Review the fields below before adding.', 'info');
+      showToast("Parsed. Review the fields below before adding.", "info");
     }
   };
 
@@ -67,34 +75,49 @@ export default function App() {
     setDraft((previous) => ({ ...previous, [field]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!draft.name.trim() || !draft.phone.trim()) {
-      showToast('Name and phone are required.', 'error');
+      showToast("Name and phone are required.", "error");
       return;
     }
-    const order = addOrder(draft);
-    setDraft(EMPTY_ORDER_DRAFT);
-    showToast(`Order for ${order.name} added.`, 'success');
+
+    try {
+      const order = await addOrder(draft);
+      setDraft(EMPTY_ORDER_DRAFT);
+      showToast(`Order for ${order.name} added.`, "success");
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to save order. Please try again.", "error");
+    }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const order = orders.find((item) => item.id === id);
-    deleteOrder(id);
-    showToast(order ? `Order for ${order.name} deleted.` : 'Order deleted.', 'info');
+
+    try {
+      await deleteOrder(id);
+      showToast(
+        order ? `Order for ${order.name} deleted.` : "Order deleted.",
+        "info",
+      );
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to delete order. Please try again.", "error");
+    }
   };
 
   const handleExport = async () => {
     if (notDoneOrders.length === 0) return;
     try {
       await exportOrdersToXlsx(notDoneOrders, buildExportFilename());
-      markFinished(notDoneOrders.map((order) => order.id));
+      await markFinished(notDoneOrders.map((order) => order.id));
       showToast(
         `Exported ${notDoneOrders.length} order(s). Marked as finished.`,
-        'success',
+        "success",
       );
     } catch {
-      showToast('Export failed. Please try again.', 'error');
+      showToast("Export failed. Please try again.", "error");
     }
   };
 
@@ -109,7 +132,9 @@ export default function App() {
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         <Header
           theme={theme}
-          onToggleTheme={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+          onToggleTheme={() =>
+            setTheme((prev) => (prev === "light" ? "dark" : "light"))
+          }
         />
 
         <Stats
@@ -155,9 +180,9 @@ export default function App() {
               onDelete={handleDelete}
               emptyTitle="No orders found"
               emptyDescription={
-                searchTerm || statusFilter !== 'All'
-                  ? 'Try adjusting your search or status filter.'
-                  : 'Paste an order above to get started.'
+                searchTerm || statusFilter !== "All"
+                  ? "Try adjusting your search or status filter."
+                  : "Paste an order above to get started."
               }
             />
           </div>

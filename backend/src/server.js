@@ -24,6 +24,7 @@ app.post("/orders", async (req, res) => {
         address,
         amount,
         note,
+        status: "NOT_DONE",
       },
     });
 
@@ -73,6 +74,37 @@ app.delete("/orders/:id", async (req, res) => {
 
     console.error(error);
     res.status(500).json({ error: "Failed to delete order" });
+  }
+});
+
+// Update Status
+
+app.patch("/orders/:id/status", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { status } = req.body;
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: "Invalid order ID" });
+    }
+
+    if (!["NOT_DONE", "FINISHED"].includes(status)) {
+      return res.status(400).json({ error: "Invalid order status" });
+    }
+
+    const order = await prisma.order.update({
+      where: { id },
+      data: { status },
+    });
+
+    res.json(order);
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    console.error(error);
+    res.status(500).json({ error: "Failed to update order status" });
   }
 });
 
