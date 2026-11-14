@@ -8,6 +8,12 @@ export const STATUS = {
   FINISHED: "FINISHED",
 };
 
+/** User-facing labels for the stored status values. */
+export const STATUS_LABELS = {
+  [STATUS.NOT_DONE]: "Not Done",
+  [STATUS.FINISHED]: "Finished",
+};
+
 /** Options shown in the status filter tabs. "All" is a pseudo-status. */
 export const STATUS_FILTERS = ["All", STATUS.NOT_DONE, STATUS.FINISHED];
 

@@ -1,13 +1,116 @@
 <!doctype html>
-<html lang="en" data-theme="bumblebee">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>order-management</title>
+    <meta
+      name="description"
+      content="Paste, track and export customer orders with Order Hub."
+    />
+    <meta name="theme-color" content="#f7f6f2" />
+    <title>Order Hub — Order Management</title>
+
+    <!-- Apply the saved theme before first paint to avoid a flash. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("orderlog:theme");
+          var theme =
+            stored === "dark" || stored === "light"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+        } catch (error) {
+          // localStorage may be unavailable; fall back to the default theme.
+        }
+      })();
+    </script>
+
+    <!-- Critical inline styles so the boot loader renders before the app bundle. -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #f7f6f2;
+      }
+
+      html[data-theme="dark"],
+      html[data-theme="dark"] body {
+        background: #1d232a;
+      }
+
+      .boot-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: #f7f6f2;
+        color: #1f2937;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+
+      html[data-theme="dark"] .boot-loader {
+        background: #1d232a;
+        color: #e5e7eb;
+      }
+
+      .boot-loader__ring {
+        width: 44px;
+        height: 44px;
+        border-radius: 9999px;
+        border: 4px solid rgba(31, 41, 55, 0.12);
+        border-top-color: #e0a82e;
+        animation: boot-spin 0.8s linear infinite;
+      }
+
+      html[data-theme="dark"] .boot-loader__ring {
+        border-color: rgba(229, 231, 235, 0.15);
+        border-top-color: #e0a82e;
+      }
+
+      .boot-loader__label {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        opacity: 0.75;
+      }
+
+      .boot-loader__hint {
+        margin: 0;
+        font-size: 12px;
+        opacity: 0.5;
+      }
+
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .boot-loader__ring {
+          animation-duration: 2s;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot-loader" role="status" aria-live="polite">
+        <div class="boot-loader__ring" aria-hidden="true"></div>
+        <p class="boot-loader__label">Loading Order Hub…</p>
+        <p class="boot-loader__hint">Connecting to the database…</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
