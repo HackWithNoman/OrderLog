@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { STATUS } from "../constants";
 
-const API_URL = "http://localhost:5000";
+const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(
+  /\/+$/,
+  "",
+);
 const CACHE_KEY = "orderlog:orders:v1";
 
 /** Re-fetch while the tab is visible so changes from other devices show up. */
