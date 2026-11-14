@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
+    "@cloudflare/vite-plugin": "^1.69.1",
     "@tailwindcss/vite": "^4.3.3",
     "daisyui": "^5.7.47",
     "lucide-react": "^1.52.0",
